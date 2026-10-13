@@ -123,8 +123,39 @@ a.stage-cell:active,
   background: var(--primary);
 }
 
-.menu-stages {
+/* ステージの種類ごとの色（script.js の STAGE_SETS の color と対応） */
+.menu-blue {
   background: var(--num);
+}
+
+.menu-green {
+  background: #22a06b;
+}
+
+.menu-purple {
+  background: #8b5cf6;
+}
+
+/* ステージのメニューは少し小さめ */
+.menu-small {
+  padding: 14px 20px;
+}
+
+.menu-small .menu-title {
+  font-size: 20px;
+}
+
+.section-title {
+  margin: 8px 0 -4px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.set-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .menu-badge {
@@ -274,7 +305,13 @@ a.stage-cell:active,
   transition: opacity 0.15s, background 0.15s;
 }
 
-.numbers.count-6 .num-card {
+/* 数字が7つのときは 4つ＋3つ の2段にする */
+.numbers.count-7 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.numbers.count-6 .num-card,
+.numbers.count-7 .num-card {
   aspect-ratio: auto;
   height: 64px;
   font-size: 34px;
@@ -314,6 +351,10 @@ a.stage-cell:active,
 /* 式が長くなったら文字を小さくする */
 .expression.is-long {
   font-size: 22px;
+}
+
+.expression.is-very-long {
+  font-size: 18px;
 }
 
 /* 何も入力していないときの案内文 */

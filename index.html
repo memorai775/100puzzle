@@ -28,23 +28,20 @@
         <span class="menu-desc" id="daily-desc">6つの数字で100を作る</span>
       </a>
 
-      <!-- いつでも遊べるテンパズル -->
-      <a class="menu-card menu-stages" href="#/stages">
-        <span class="menu-badge">いつでも</span>
-        <span class="menu-title">テンパズル</span>
-        <span class="menu-desc" id="stages-desc">4つの数字で10を作る・全30ステージ</span>
-      </a>
-
       <p class="streak" id="streak"></p>
+
+      <!-- いつでも遊べるステージ（テンパズル・100パズル・1000パズル。script.js で作ります） -->
+      <h2 class="section-title">ステージ（いつでも遊べる）</h2>
+      <div class="set-menu" id="set-menu"></div>
     </section>
 
     <!-- =====================================================
-         テンパズル：ステージ選択画面
+         ステージ選択画面（3種類共通）
          ===================================================== -->
     <section class="screen" id="screen-stages" hidden>
       <header class="screen-header">
         <a class="back-btn" href="#/">← もどる</a>
-        <h2 class="screen-title">テンパズル</h2>
+        <h2 class="screen-title" id="stages-title"></h2>
       </header>
       <p class="stage-progress" id="stage-progress"></p>
       <div class="stage-grid" id="stage-grid"></div>
