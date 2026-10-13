@@ -87,6 +87,13 @@
       <p class="message" id="message" aria-live="polite"></p>
       <p class="attempts" id="attempts"></p>
 
+      <!-- ヒントと答え（答えのボタンはヒントを1つ見ると出てくる） -->
+      <div class="help-row">
+        <button class="help-btn" id="hint-btn">💡 ヒント</button>
+        <button class="help-btn help-answer" id="answer-btn" hidden>答えを見る</button>
+      </div>
+      <ol class="hint-list" id="hint-list"></ol>
+
       <!-- クリア後に出すボタン（中身は script.js で作ります） -->
       <div class="after-clear" id="after-clear" hidden></div>
     </section>

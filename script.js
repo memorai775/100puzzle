@@ -142,45 +142,105 @@ function formatFraction(f) {
 }
 
 /* ---------------------------------------------------------
-   ソルバー（その数字で target が作れるか調べる）
+   ソルバー（その数字で target を作る式を探す）
    考え方：数字の中から2つ選んで1つにまとめる（＋−×÷）のを
    残り1つになるまで繰り返す。全パターンを試せば、
    並び替えやカッコの付け方もすべて調べたことになる。
    数字が6つだとパターンが多いので、一度「ダメ」とわかった
    組み合わせはメモしておき、同じ計算をくり返さないようにする。
+
+   計算途中の値は次の形で持つ（ヒントと答えの表示に使う）
+     value : 値（分数）
+     text  : 式の文字（例：'(9 − 5 + 1) × 2'）
+     prec  : 式のいちばん外側の計算の強さ（1=＋− / 2=×÷ / 3=数字だけ）
+     steps : ここまでの計算の手順 [{ a, op, b, result }, …]
    --------------------------------------------------------- */
+
+// 解けるかどうかだけ知りたいとき
 function canMakeTarget(numbers, target) {
-  return searchTarget(numbers.map((n) => frac(n)), target, new Set());
+  return findSolution(numbers, target, true) !== null;
 }
 
-function searchTarget(list, target, failed) {
+// 答えの式を1つ探す（見つからなければ null）
+// まずは途中でマイナスにならない式を探し、なければマイナスありで探す
+function solvePuzzle(numbers, target) {
+  return findSolution(numbers, target, false) || findSolution(numbers, target, true);
+}
+
+function findSolution(numbers, target, allowNegative) {
+  const items = numbers.map((n) => ({
+    value: frac(n),
+    text: String(n),
+    prec: 3,
+    steps: [],
+  }));
+  return searchSolution(items, target, new Set(), allowNegative);
+}
+
+// a と b を演算子 op でまとめたものを作る
+function combine(a, op, b) {
+  const calc = { '+': add, '-': sub, '*': mul, '/': div };
+  const value = calc[op](a.value, b.value);
+
+  // 計算の順番が変わらないよう、必要なところだけカッコを付ける
+  const left = needsParen(a, op, 'left') ? `(${a.text})` : a.text;
+  const right = needsParen(b, op, 'right') ? `(${b.text})` : b.text;
+
+  return {
+    value,
+    text: `${left} ${OP_LABELS[op]} ${right}`,
+    prec: op === '+' || op === '-' ? 1 : 2,
+    steps: [...a.steps, ...b.steps, { a: a.value, op, b: b.value, result: value }],
+  };
+}
+
+// カッコが必要か（例：(1 + 2) × 3 の左側、8 ÷ (2 × 2) の右側）
+function needsParen(item, op, side) {
+  if (op === '+') return false;
+  if (op === '-') return side === 'right' && item.prec === 1;
+  if (op === '*') return item.prec === 1;
+  // 割り算：左は＋−のとき、右は数字以外のときにカッコ
+  return side === 'left' ? item.prec === 1 : item.prec <= 2;
+}
+
+// a が b 以上か（分数どうしの比べ方）
+function isGreaterOrEqual(a, b) {
+  return a.n * b.d >= b.n * a.d;
+}
+
+function searchSolution(items, target, failed, allowNegative) {
   // 残り1つになったら、それが target かどうか
-  if (list.length === 1) return equalsInt(list[0], target);
+  if (items.length === 1) {
+    return equalsInt(items[0].value, target) ? items[0] : null;
+  }
 
   // 同じ数の組み合わせを前に調べてダメだったなら、すぐ終わる
-  const key = list.map((f) => `${f.n}/${f.d}`).sort().join(',');
-  if (failed.has(key)) return false;
+  const key = items.map((it) => `${it.value.n}/${it.value.d}`).sort().join(',');
+  if (failed.has(key)) return null;
 
-  for (let i = 0; i < list.length; i++) {
-    for (let j = i + 1; j < list.length; j++) {
-      const a = list[i];
-      const b = list[j];
+  for (let i = 0; i < items.length; i++) {
+    for (let j = i + 1; j < items.length; j++) {
+      const a = items[i];
+      const b = items[j];
       // 選ばなかった残りの数
-      const rest = list.filter((_, k) => k !== i && k !== j);
+      const rest = items.filter((_, k) => k !== i && k !== j);
 
-      // a と b から作れる数（引き算・割り算は順番を逆にしたものも試す）
-      const candidates = [add(a, b), sub(a, b), sub(b, a), mul(a, b)];
-      if (b.n !== 0) candidates.push(div(a, b));
-      if (a.n !== 0) candidates.push(div(b, a));
+      // a と b から作れるもの（引き算・割り算は順番を逆にしたものも試す）
+      const candidates = [combine(a, '+', b), combine(a, '*', b)];
+      if (allowNegative || isGreaterOrEqual(a.value, b.value)) candidates.push(combine(a, '-', b));
+      if (allowNegative || isGreaterOrEqual(b.value, a.value)) candidates.push(combine(b, '-', a));
+      if (b.value.n !== 0) candidates.push(combine(a, '/', b));
+      if (a.value.n !== 0) candidates.push(combine(b, '/', a));
 
       for (const c of candidates) {
-        if (searchTarget([...rest, c], target, failed)) return true;
+        const found = searchSolution([...rest, c], target, failed, allowNegative);
+        if (found) return found;
       }
     }
   }
 
   failed.add(key);
-  return false;
+  return null;
 }
 
 /* ---------------------------------------------------------
@@ -250,9 +310,19 @@ function saveData(key, value) {
 
 // 今日の100パズルの進み具合（日付が変わっていたら新しく始める）
 function loadDailyProgress(today) {
+  const empty = {
+    date: today,
+    attempts: 0,
+    history: [],
+    solved: false,
+    answer: '',
+    hintsShown: 0,      // 見たヒントの数
+    answerShown: false, // 答えを見たか
+  };
   const saved = loadData(STORAGE_KEYS.daily, null);
-  if (saved && saved.date === today) return saved;
-  return { date: today, attempts: 0, history: [], solved: false, answer: '' };
+  // 古い形式で保存されていても足りない項目は empty で補う
+  if (saved && saved.date === today) return { ...empty, ...saved };
+  return empty;
 }
 
 function saveDailyProgress() {
@@ -262,6 +332,8 @@ function saveDailyProgress() {
     history: game.history,
     solved: game.solved,
     answer: game.answerText,
+    hintsShown: game.hintsShown,
+    answerShown: game.answerShown,
   });
 }
 
@@ -283,14 +355,27 @@ function updateStreak(today) {
   saveData(STORAGE_KEYS.streak, streak);
 }
 
-// テンパズルのクリア状況 { cleared: { ステージ番号: クリアした挑戦回数 } }
+// テンパズルのクリア状況
+//   cleared  : { ステージ番号: クリアした挑戦回数 }
+//   revealed : { ステージ番号: true }（答えを見たステージ）
 function loadStageProgress() {
-  return loadData(STORAGE_KEYS.stages, { cleared: {} });
+  return { cleared: {}, revealed: {}, ...loadData(STORAGE_KEYS.stages, {}) };
+}
+
+// クリアしたか、答えを見たか（どちらでも次のステージが開く）
+function isStageFinished(id, progress = loadStageProgress()) {
+  return Boolean(progress.cleared[id] || progress.revealed[id]);
 }
 
 function isStageUnlocked(id, progress = loadStageProgress()) {
-  // ステージ1は最初から。それ以外は1つ前をクリアしていれば遊べる
-  return id === 1 || Boolean(progress.cleared[id - 1]);
+  // ステージ1は最初から。それ以外は1つ前を終えていれば遊べる
+  return id === 1 || isStageFinished(id - 1, progress);
+}
+
+function markStageRevealed(id) {
+  const progress = loadStageProgress();
+  progress.revealed[id] = true;
+  saveData(STORAGE_KEYS.stages, progress);
 }
 
 function markStageCleared(id, attempts) {
@@ -319,7 +404,15 @@ const game = {
   history: [],     // 各回の結果（true=正解 / false=不正解）。シェアで使う
   solved: false,   // クリアしたか
   answerText: '',  // 正解した式（100パズルで再表示する用）
+  hintsShown: 0,      // 見たヒントの数
+  answerShown: false, // 答えを見たか（見たらその問題は終了）
+  solution: null,     // ソルバーが見つけた答え（ヒントを押したときに作る）
 };
+
+// クリアしたか答えを見たかで、もう入力できない状態か
+function isFinished() {
+  return game.solved || game.answerShown;
+}
 
 /* ---------------------------------------------------------
    入力のルール（今その位置に置けるボタンかどうか）
@@ -464,6 +557,9 @@ function cacheElements() {
   el.checkBtn = document.getElementById('check-btn');
   el.message = document.getElementById('message');
   el.attempts = document.getElementById('attempts');
+  el.hintBtn = document.getElementById('hint-btn');
+  el.answerBtn = document.getElementById('answer-btn');
+  el.hintList = document.getElementById('hint-list');
   el.afterClear = document.getElementById('after-clear');
   el.confetti = document.getElementById('confetti');
   el.numberButtons = [];
@@ -485,11 +581,16 @@ function showHome() {
 
   // 100パズル：今日クリア済みかどうか
   const daily = loadDailyProgress(today);
-  el.dailyDesc.textContent = daily.solved
-    ? `No.${getPuzzleNumber(today)} クリア済み ✓（${daily.attempts}回目で正解）`
-    : `No.${getPuzzleNumber(today)}・6つの数字で100を作る`;
+  const no = `No.${getPuzzleNumber(today)}`;
+  if (daily.solved) {
+    el.dailyDesc.textContent = `${no} クリア済み ✓（${daily.attempts}回目で正解）`;
+  } else if (daily.answerShown) {
+    el.dailyDesc.textContent = `${no} 答えを見ました・また明日！`;
+  } else {
+    el.dailyDesc.textContent = `${no}・6つの数字で100を作る`;
+  }
 
-  // テンパズル：クリアしたステージ数
+  // テンパズル：クリアしたステージ数（答えを見ただけのステージは含めない）
   const clearedCount = Object.keys(loadStageProgress().cleared).length;
   el.stagesDesc.textContent = `4つの数字で10を作る・クリア ${clearedCount} / ${STAGES.length}`;
 
@@ -525,10 +626,13 @@ function showStageList() {
       cell.classList.add('is-locked');
       cell.textContent = '🔒';
     }
-    if (cleared) {
+    // 右上の印：クリアは★、答えを見ただけなら「答」
+    const revealedOnly = !cleared && Boolean(progress.revealed[id]);
+    if (revealedOnly) cell.classList.add('is-revealed');
+    if (cleared || revealedOnly) {
       const mark = document.createElement('span');
       mark.className = 'stage-mark';
-      mark.textContent = '★';
+      mark.textContent = cleared ? '★' : '答';
       cell.appendChild(mark);
     }
     el.stageGrid.appendChild(cell);
@@ -550,6 +654,9 @@ function setupGame(config) {
     history: [],
     solved: false,
     answerText: '',
+    hintsShown: 0,
+    answerShown: false,
+    solution: null,
   }, config);
 
   // 説明文（例：6つの数字を全部使って 100 を作ろう）
@@ -590,6 +697,8 @@ function startDaily() {
     history: progress.history,
     solved: progress.solved,
     answerText: progress.answer,
+    hintsShown: progress.hintsShown,
+    answerShown: progress.answerShown,
   });
 
   el.gameTitle.textContent = '今日の100パズル';
@@ -600,6 +709,8 @@ function startDaily() {
   if (game.solved) {
     showMessage(`クリア済み！ ${game.attempts}回目で正解`, 'correct');
     el.expressionBox.classList.add('is-correct');
+  } else if (game.answerShown) {
+    showMessage('今日は答えを見ました。また明日挑戦しよう！', 'hint');
   }
 
   showScreen('game');
@@ -629,7 +740,7 @@ function startStage(id) {
    ゲーム中の操作
    --------------------------------------------------------- */
 function addToken(token) {
-  if (game.solved) return;
+  if (isFinished()) return;
   game.tokens.push(token);
   clearResult(); // 式を変えたら前回の結果表示は消す
   renderGame();
@@ -648,7 +759,7 @@ function clearAll() {
 }
 
 function checkAnswer() {
-  if (game.solved) return;
+  if (isFinished()) return;
 
   // 数字を全部使っているか
   const usedCount = game.tokens.filter((t) => t.type === 'num').length;
@@ -695,6 +806,86 @@ function checkAnswer() {
   if (game.mode === 'daily') saveDailyProgress();
 
   renderGame();
+}
+
+/* ---------------------------------------------------------
+   ヒントと答え
+   ヒントは、答えの計算手順を1つずつ見せる。
+   （例：「まず 9 − 5 = 4」→「次に 4 + 1 = 5」）
+   最後の1手は見せないので、ヒントの数は「手順の数 − 1」。
+   ヒントを1つ以上見たら「答えを見る」ボタンが出る。
+   --------------------------------------------------------- */
+
+// 答えを用意する（初めて必要になったときに1回だけ計算）
+function getSolution() {
+  if (!game.solution) game.solution = solvePuzzle(game.numbers, game.target);
+  return game.solution;
+}
+
+// 出せるヒントの数
+// 2つを1つにまとめる手順は「数字の数 − 1」回。最後の1手は見せないので − 2
+function maxHints() {
+  return game.numbers.length - 2;
+}
+
+function showHint() {
+  if (isFinished() || game.hintsShown >= maxHints()) return;
+  game.hintsShown++;
+  if (game.mode === 'daily') saveDailyProgress();
+  renderGame();
+}
+
+function showAnswer() {
+  if (isFinished()) return;
+
+  // うっかり押したときのために確認する
+  const warning = game.mode === 'daily'
+    ? '答えを見ると、今日の100パズルは終了します（連続正解は途切れます）。見ますか？'
+    : '答えを見ますか？（★は付きませんが、次のステージは遊べるようになります）';
+  if (!window.confirm(warning)) return;
+
+  game.answerShown = true;
+  game.tokens = [];
+  clearResult();
+  showMessage('↑ 答えの一例です。次はがんばろう！', 'hint');
+
+  if (game.mode === 'daily') {
+    saveDailyProgress();
+  } else {
+    markStageRevealed(game.stageId);
+  }
+  renderGame();
+}
+
+// 計算手順1つを文字にする（例：9 − 5 = 4）
+function stepToText(step) {
+  return `${formatFraction(step.a)} ${OP_LABELS[step.op]} ${formatFraction(step.b)} = ${formatFraction(step.result)}`;
+}
+
+// ヒント・答えの表示を更新する
+function renderHelp() {
+  // 見たヒントの一覧（答えを見たら、最後の手順まで全部出す）
+  el.hintList.innerHTML = '';
+  const solution = game.hintsShown > 0 || game.answerShown ? getSolution() : null;
+  if (solution) {
+    const count = game.answerShown ? solution.steps.length : game.hintsShown;
+    solution.steps.slice(0, count).forEach((step, i) => {
+      const item = document.createElement('li');
+      const order = i === 0 ? 'まず' : i === solution.steps.length - 1 ? '最後に' : '次に';
+      item.textContent = `${order} ${stepToText(step)}`;
+      el.hintList.appendChild(item);
+    });
+  }
+
+  // ボタン（クリアしたか答えを見たら隠す）
+  const finished = isFinished();
+  const remaining = maxHints() - game.hintsShown;
+  el.hintBtn.hidden = finished;
+  el.hintBtn.disabled = remaining <= 0;
+  el.hintBtn.textContent = remaining > 0
+    ? `💡 ヒント（あと${remaining}回）`
+    : '💡 ヒントはここまで';
+  el.answerBtn.hidden = finished || game.hintsShown === 0;
 }
 
 /* ---------------------------------------------------------
@@ -748,10 +939,10 @@ function launchConfetti() {
   }
 }
 
-// クリア後に出すボタンを作る
+// クリア後（または答えを見た後）に出すボタンを作る
 function renderAfterClear() {
-  el.afterClear.hidden = !game.solved;
-  if (!game.solved) return;
+  el.afterClear.hidden = !isFinished();
+  if (!isFinished()) return;
 
   if (game.mode === 'daily') {
     el.afterClear.innerHTML =
@@ -762,18 +953,25 @@ function renderAfterClear() {
     el.afterClear.innerHTML =
       `<a class="link-btn is-primary" href="#/stage/${game.stageId + 1}">次のステージへ ▶</a>` +
       '<a class="link-btn" href="#/stages">ステージ一覧</a>';
-  } else {
+  } else if (game.solved) {
     el.afterClear.innerHTML =
       '<p class="message is-correct">🏆 全ステージクリア！</p>' +
+      '<a class="link-btn" href="#/stages">ステージ一覧</a>';
+  } else {
+    el.afterClear.innerHTML =
+      // 同じURLへのリンクでは画面が切り替わらないので、ボタンにする
+      '<button class="link-btn is-primary" data-action="retry">もう一度挑戦する</button>' +
       '<a class="link-btn" href="#/stages">ステージ一覧</a>';
   }
 }
 
 // 状態に合わせてゲーム画面を更新する
 function renderGame() {
-  // 式の表示（クリア済みで式が空なら、正解した式を出す）
+  // 式の表示（クリア済みなら正解した式、答えを見たなら答えの式を出す）
   let text = tokensToText(game.tokens);
   if (!text && game.solved) text = game.answerText;
+  if (!text && game.answerShown) text = `${getSolution().text} = ${game.target}`;
+  el.expressionBox.classList.toggle('is-answer', game.answerShown);
 
   if (!text) {
     el.expression.textContent = '数字と記号をタップして式を作ろう';
@@ -783,28 +981,32 @@ function renderGame() {
     el.expression.className = text.length > 16 ? 'expression is-long' : 'expression';
   }
 
+  // クリアしたか答えを見たら、もう入力できない
+  const finished = isFinished();
+
   // 数字カード：使ったものは薄く、置けないときは押せなくする
   el.numberButtons.forEach((button, index) => {
     button.classList.toggle('is-used', isNumberUsed(index));
-    button.disabled = game.solved || !canAddNumber(index);
+    button.disabled = finished || !canAddNumber(index);
   });
 
   // 演算子・カッコ
   el.opButtons.forEach((button) => {
-    button.disabled = game.solved || !canAddOperator();
+    button.disabled = finished || !canAddOperator();
   });
-  el.leftParen.disabled = game.solved || !canAddLeftParen();
-  el.rightParen.disabled = game.solved || !canAddRightParen();
+  el.leftParen.disabled = finished || !canAddLeftParen();
+  el.rightParen.disabled = finished || !canAddRightParen();
 
   // 編集ボタン・答え合わせ
   const isEmpty = game.tokens.length === 0;
-  el.undoBtn.disabled = game.solved || isEmpty;
-  el.clearBtn.disabled = game.solved || isEmpty;
-  el.checkBtn.disabled = game.solved || isEmpty;
+  el.undoBtn.disabled = finished || isEmpty;
+  el.clearBtn.disabled = finished || isEmpty;
+  el.checkBtn.disabled = finished || isEmpty;
 
   // 挑戦回数
   el.attempts.textContent = game.attempts > 0 ? `挑戦回数：${game.attempts}回` : '';
 
+  renderHelp();
   renderAfterClear();
 }
 
@@ -854,6 +1056,13 @@ function init() {
   el.undoBtn.addEventListener('click', undo);
   el.clearBtn.addEventListener('click', clearAll);
   el.checkBtn.addEventListener('click', checkAnswer);
+  el.hintBtn.addEventListener('click', showHint);
+  el.answerBtn.addEventListener('click', showAnswer);
+
+  // 「もう一度挑戦する」ボタン（あとから作られるので、親要素でクリックを受け取る）
+  el.afterClear.addEventListener('click', (event) => {
+    if (event.target.closest('[data-action="retry"]')) startStage(game.stageId);
+  });
 
   // 念のため：ステージの問題が本当に解けるか確認（開発用。結果はコンソールに出る）
   STAGES.forEach((numbers, i) => {

@@ -416,6 +416,67 @@ a.stage-cell:active,
   font-size: 14px;
 }
 
+/* ----- ヒントと答え ----- */
+.help-row {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.help-btn {
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: #fff7d6;
+  border: 2px solid #f3dc85;
+  color: #7a5c00;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.help-btn[hidden] {
+  display: none;
+}
+
+.help-btn:disabled {
+  opacity: 0.5;
+}
+
+.help-answer {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--muted);
+}
+
+/* 見たヒントの一覧 */
+.hint-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hint-list li {
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #fff7d6;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+/* 答えを見たときの式の欄 */
+.expression-box.is-answer {
+  border-color: #f3dc85;
+  background: #fffbea;
+}
+
+/* ステージ一覧：答えを見ただけのステージ */
+.stage-cell.is-revealed .stage-mark {
+  color: var(--muted);
+  font-size: 11px;
+}
+
 /* ----- クリア後のボタン ----- */
 .after-clear {
   display: flex;
