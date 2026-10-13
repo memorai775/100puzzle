@@ -123,39 +123,78 @@ a.stage-cell:active,
   background: var(--primary);
 }
 
-/* ステージの種類ごとの色（script.js の STAGE_SETS の color と対応） */
-.menu-blue {
-  background: var(--num);
+/* ----- タブ（テンパズル / 100パズル / 1000パズル） ----- */
+/* 種類ごとの色（script.js の STAGE_SETS の color と対応） */
+.tab-blue,
+.panel-blue {
+  --set-color: var(--num);
+  --set-light: #eef2ff;
 }
 
-.menu-green {
-  background: #22a06b;
+.tab-green,
+.panel-green {
+  --set-color: #22a06b;
+  --set-light: #e8f7ef;
 }
 
-.menu-purple {
-  background: #8b5cf6;
+.tab-purple,
+.panel-purple {
+  --set-color: #8b5cf6;
+  --set-light: #f3eeff;
 }
 
-/* ステージのメニューは少し小さめ */
-.menu-small {
-  padding: 14px 20px;
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: -14px; /* 下の中身とくっつけて、つながって見せる */
 }
 
-.menu-small .menu-title {
-  font-size: 20px;
-}
-
-.section-title {
-  margin: 8px 0 -4px;
+.tab {
+  padding: 12px 4px;
+  border-radius: 14px 14px 0 0;
+  background: #ebe8e1;
   color: var(--muted);
-  font-size: 14px;
+  text-align: center;
+  font-size: 15px;
   font-weight: 700;
+  touch-action: manipulation;
 }
 
-.set-menu {
+/* 選んでいるタブ */
+.tab.is-active {
+  background: var(--set-color);
+  color: #fff;
+}
+
+/* タブの中身：選んでいるタブの色で囲む */
+.tab-panel {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  padding: 16px;
+  border-radius: 0 0 20px 20px;
+  border-top: 4px solid var(--set-color);
+  background: var(--set-light);
+}
+
+.daily-area {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 16px;
+  border-bottom: 2px dashed rgba(0, 0, 0, 0.12); /* 毎日更新とステージの区切り */
+}
+
+.daily-area[hidden] {
+  display: none;
+}
+
+.section-title {
+  margin: 0 0 -4px;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 700;
 }
 
 .menu-badge {

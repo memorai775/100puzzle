@@ -113,7 +113,41 @@ const HUNDRED_STAGES = [
 ];
 
 const THOUSAND_STAGES = [
-  /* THOUSAND_STAGES_DATA */
+  // ---- やさしい ----
+  { numbers: [1, 5, 5, 5, 7, 7, 8], answer: '8*(1+5+7*(7+5+5))' }, // 1  例：8 × (1 + 5 + 7 × (7 + 5 + 5))
+  { numbers: [1, 2, 2, 3, 4, 5, 5], answer: '5*1*2*(2+3)*4*5' }, // 2  例：5 × 1 × 2 × (2 + 3) × 4 × 5
+  { numbers: [3, 5, 5, 7, 8, 8, 9], answer: '3+5+8*(7+9*(5+8))' }, // 3  例：3 + 5 + 8 × (7 + 9 × (5 + 8))
+  { numbers: [1, 2, 2, 4, 5, 5, 6], answer: '5*5*(4+(1+2)*2*6)' }, // 4  例：5 × 5 × (4 + (1 + 2) × 2 × 6)
+  { numbers: [1, 3, 5, 5, 6, 8, 8], answer: '(5+5)*(1+3+6*(8+8))' }, // 5  例：(5 + 5) × (1 + 3 + 6 × (8 + 8))
+  { numbers: [2, 2, 4, 5, 5, 7, 8], answer: '5*(2+2+7*(8+4*5))' }, // 6  例：5 × (2 + 2 + 7 × (8 + 4 × 5))
+  { numbers: [1, 4, 4, 5, 6, 8, 8], answer: '8*(1+4+8*(6+4+5))' }, // 7  例：8 × (1 + 4 + 8 × (6 + 4 + 5))
+  { numbers: [1, 2, 2, 5, 8, 8, 9], answer: '8*(8+9*(1+2+2*5))' }, // 8  例：8 × (8 + 9 × (1 + 2 + 2 × 5))
+  // ---- ふつう ----
+  { numbers: [1, 4, 5, 6, 9, 9, 9], answer: '(4+6)*(1+9+5*(9+9))' }, // 9  例：(4 + 6) × (1 + 9 + 5 × (9 + 9))
+  { numbers: [2, 4, 4, 7, 7, 8, 9], answer: '(8+7*(2+4))*(9+4+7)' }, // 10 例：(8 + 7 × (2 + 4)) × (9 + 4 + 7)
+  { numbers: [1, 3, 7, 7, 8, 8, 9], answer: '8*(8*(7+7)+9+1+3)' }, // 11 例：8 × (8 × (7 + 7) + 9 + 1 + 3)
+  { numbers: [1, 3, 3, 4, 7, 8, 9], answer: '(3+7)*(4+8*(9+1*3))' }, // 12 例：(3 + 7) × (4 + 8 × (9 + 1 × 3))
+  { numbers: [1, 4, 4, 5, 5, 6, 7], answer: '4*(1+4+7*(5+5*6))' }, // 13 例：4 × (1 + 4 + 7 × (5 + 5 × 6))
+  { numbers: [1, 1, 2, 4, 5, 6, 9], answer: '5*(4+6)*(1+1+2*9)' }, // 14 例：5 × (4 + 6) × (1 + 1 + 2 × 9)
+  { numbers: [2, 3, 4, 4, 5, 6, 9], answer: '5*(4+6)*(2*4+3+9)' }, // 15 例：5 × (4 + 6) × (2 × 4 + 3 + 9)
+  { numbers: [1, 5, 6, 7, 7, 8, 9], answer: '(1+7)*(6+7+8*(5+9))' }, // 16 例：(1 + 7) × (6 + 7 + 8 × (5 + 9))
+  // ---- むずかしい（引き算が必要） ----
+  { numbers: [3, 6, 6, 7, 9, 9, 9], answer: '7-6+9*(3+6*(9+9))' }, // 17 例：7 − 6 + 9 × (3 + 6 × (9 + 9))
+  { numbers: [1, 3, 3, 5, 6, 6, 6], answer: '5*(3-1+6*(6*6-3))' }, // 18 例：5 × (3 − 1 + 6 × (6 × 6 − 3))
+  { numbers: [1, 2, 2, 3, 3, 4, 7], answer: '2*4*(2*3*3*7-1)' }, // 19 例：2 × 4 × (2 × 3 × 3 × 7 − 1)
+  { numbers: [2, 2, 2, 3, 3, 4, 7], answer: '(2+2)*(3*3*4*7-2)' }, // 20 例：(2 + 2) × (3 × 3 × 4 × 7 − 2)
+  { numbers: [2, 3, 3, 3, 9, 9, 9], answer: '3-2+9*(3+9*(3+9))' }, // 21 例：3 − 2 + 9 × (3 + 9 × (3 + 9))
+  // ---- もっとむずかしい（割り算が必要） ----
+  { numbers: [3, 3, 3, 5, 5, 6, 6], answer: '5*5*(3+3/3+6*6)' }, // 22 例：5 × 5 × (3 + 3 ÷ 3 + 6 × 6)
+  { numbers: [2, 2, 3, 3, 9, 9, 9], answer: '2/2+9*(3+9*(3+9))' }, // 23 例：2 ÷ 2 + 9 × (3 + 9 × (3 + 9))
+  { numbers: [4, 4, 4, 7, 7, 7, 7], answer: '(4+4*4)*(7*7+7/7)' }, // 24 例：(4 + 4 × 4) × (7 × 7 + 7 ÷ 7)
+  { numbers: [5, 5, 6, 6, 6, 6, 7], answer: '5*5*(6*7-(6+6)/6)' }, // 25 例：5 × 5 × (6 × 7 − (6 + 6) ÷ 6)
+  { numbers: [2, 2, 6, 6, 6, 6, 9], answer: '(2+9*(6+6*6*6))/2' }, // 26 例：(2 + 9 × (6 + 6 × 6 × 6)) ÷ 2
+  // ---- 超むずかしい（途中で分数が出る） ----
+  { numbers: [6, 6, 6, 7, 9, 9, 9], answer: '(6+6)*(7/(9-6)+9*9)' }, // 27 例：(6 + 6) × (7 ÷ (9 − 6) + 9 × 9)
+  { numbers: [2, 3, 3, 9, 9, 9, 9], answer: '(3+9)*((9-2)/3+9*9)' }, // 28 例：(3 + 9) × ((9 − 2) ÷ 3 + 9 × 9)
+  { numbers: [5, 6, 6, 9, 9, 9, 9], answer: '(9*9-6)*(5+9-6/9)' }, // 29 例：(9 × 9 − 6) × (5 + 9 − 6 ÷ 9)
+  { numbers: [6, 6, 6, 6, 7, 7, 9], answer: '(6+6)*(6*(7+7)-6/9)' }, // 30 例：(6 + 6) × (6 × (7 + 7) − 6 ÷ 9)
 ];
 
 /* ---------------------------------------------------------
@@ -631,15 +665,16 @@ const el = {};
 function cacheElements() {
   el.screens = {
     home: document.getElementById('screen-home'),
-    stages: document.getElementById('screen-stages'),
     game: document.getElementById('screen-game'),
   };
-  // トップ
+  // トップ（タブ）
+  el.tabs = document.getElementById('tabs');
+  el.tabPanel = document.getElementById('tab-panel');
+  el.dailyArea = document.getElementById('daily-area');
   el.dailyDesc = document.getElementById('daily-desc');
-  el.setMenu = document.getElementById('set-menu');
   el.streak = document.getElementById('streak');
-  // ステージ選択
-  el.stagesTitle = document.getElementById('stages-title');
+  // トップ（ステージ一覧）
+  el.stagesHeading = document.getElementById('stages-heading');
   el.stageProgress = document.getElementById('stage-progress');
   el.stageGrid = document.getElementById('stage-grid');
   // ゲーム
@@ -675,12 +710,49 @@ function showScreen(name) {
 }
 
 /* ---------------------------------------------------------
-   トップ画面
+   トップ画面（タブで テンパズル / 100パズル / 1000パズル を切り替える）
    --------------------------------------------------------- */
-function showHome() {
-  const today = getJstDateString();
+const TAB_STORAGE_KEY = 'numpuzzle.tab'; // 最後に開いたタブ
+const DEFAULT_TAB = 'hundred';           // 初めての人は100パズルのタブから
 
-  // 100パズル：今日クリア済みかどうか
+function showHome(setKey) {
+  // タブの指定がなければ、前回開いていたタブを開く
+  if (!setKey) setKey = loadData(TAB_STORAGE_KEY, DEFAULT_TAB);
+  if (!STAGE_SETS[setKey]) setKey = DEFAULT_TAB;
+  saveData(TAB_STORAGE_KEY, setKey);
+
+  renderTabs(setKey);
+
+  // 今日の100パズルは、100パズルのタブにだけ出す
+  el.dailyArea.hidden = setKey !== 'hundred';
+  if (setKey === 'hundred') renderDailyCard();
+
+  renderStageList(setKey);
+  showScreen('home');
+}
+
+// タブのボタン（STAGE_SETS から作る）
+function renderTabs(activeKey) {
+  el.tabs.innerHTML = '';
+  for (const setKey in STAGE_SETS) {
+    const set = STAGE_SETS[setKey];
+    const tab = document.createElement('a');
+    tab.className = `tab tab-${set.color}`;
+    tab.href = `#/set/${setKey}`;
+    tab.textContent = set.name;
+    if (setKey === activeKey) {
+      tab.classList.add('is-active');
+      tab.setAttribute('aria-current', 'page');
+    }
+    el.tabs.appendChild(tab);
+  }
+  // 中身の枠もタブの色に合わせる
+  el.tabPanel.className = `tab-panel panel-${STAGE_SETS[activeKey].color}`;
+}
+
+// 今日の100パズルのカードと連続正解日数
+function renderDailyCard() {
+  const today = getJstDateString();
   const daily = loadDailyProgress(today);
   const no = `No.${getPuzzleNumber(today)}`;
   if (daily.solved) {
@@ -691,43 +763,17 @@ function showHome() {
     el.dailyDesc.textContent = `${no}・6つの数字で100を作る`;
   }
 
-  // ステージの種類ごとのメニュー（STAGE_SETS から作る）
-  el.setMenu.innerHTML = '';
-  for (const setKey in STAGE_SETS) {
-    const set = STAGE_SETS[setKey];
-    // クリアしたステージ数（答えを見ただけのステージは含めない）
-    const clearedCount = Object.keys(loadStageProgress(setKey).cleared).length;
-    const count = set.stages[0].numbers.length;
-
-    const card = document.createElement('a');
-    card.className = `menu-card menu-small menu-${set.color}`;
-    card.href = `#/set/${setKey}`;
-
-    const title = document.createElement('span');
-    title.className = 'menu-title';
-    title.textContent = set.name;
-    const desc = document.createElement('span');
-    desc.className = 'menu-desc';
-    desc.textContent = `${count}つの数字で${set.target}を作る・クリア ${clearedCount} / ${set.stages.length}`;
-
-    card.append(title, desc);
-    el.setMenu.appendChild(card);
-  }
-
-  // 連続正解日数
   const streak = getCurrentStreak(today);
-  el.streak.textContent = streak > 0 ? `🔥 100パズル ${streak}日連続正解中` : '';
-
-  showScreen('home');
+  el.streak.textContent = streak > 0 ? `🔥 ${streak}日連続正解中` : '';
 }
 
-/* ---------------------------------------------------------
-   ステージ選択画面
-   --------------------------------------------------------- */
-function showStageList(setKey) {
+// ステージの一覧
+function renderStageList(setKey) {
   const set = STAGE_SETS[setKey];
   const progress = loadStageProgress(setKey);
-  el.stagesTitle.textContent = set.name;
+  const count = set.stages[0].numbers.length;
+  el.stagesHeading.textContent =
+    `${set.name} ステージ（${count}つの数字で${set.target}を作る）`;
   el.stageGrid.innerHTML = '';
   let clearedCount = 0;
 
@@ -761,7 +807,6 @@ function showStageList(setKey) {
   });
 
   el.stageProgress.textContent = `クリア ${clearedCount} / ${set.stages.length}`;
-  showScreen('stages');
 }
 
 /* ---------------------------------------------------------
@@ -827,7 +872,7 @@ function startDaily() {
 
   el.gameTitle.textContent = '今日の100パズル';
   el.puzzleInfo.textContent = `No.${getPuzzleNumber(today)}　${today.replace(/-/g, '/')}`;
-  el.gameBack.href = '#/';
+  el.gameBack.href = '#/set/hundred';
 
   // もうクリアしていたら、その結果を表示する
   if (game.solved) {
@@ -1080,7 +1125,7 @@ function renderAfterClear() {
   if (game.mode === 'daily') {
     el.afterClear.innerHTML =
       '<p class="attempts">次の問題は明日の0時（日本時間）に出ます</p>' +
-      '<a class="link-btn is-primary" href="#/">ステージで遊ぶ</a>';
+      '<a class="link-btn is-primary" href="#/set/hundred">100パズルのステージで遊ぶ</a>';
     return;
   }
 
@@ -1153,9 +1198,9 @@ function renderGame() {
 
 /* ---------------------------------------------------------
    画面の切り替え（URLの # の部分で決める）
-     #/          → トップ
+     #/          → トップ（前回開いていたタブ）
      #/daily     → 今日の100パズル
-     #/set/ten        → テンパズルのステージ選択
+     #/set/ten        → トップのテンパズルのタブ
      #/set/ten/5      → テンパズル ステージ5
      （ten の部分は hundred・thousand も同じ）
    こうしておくと、スマホの「戻る」でも前の画面に戻れる。
@@ -1171,11 +1216,11 @@ function route() {
     const setKey = setMatch[1];
     const id = Number(setMatch[2]);
     const progress = loadStageProgress(setKey);
-    // 番号があり、そのステージが遊べるならゲームへ。それ以外は一覧
+    // 番号があり、そのステージが遊べるならゲームへ。それ以外はトップのそのタブ
     if (id >= 1 && id <= STAGE_SETS[setKey].stages.length && isStageUnlocked(id, progress)) {
       startStage(setKey, id);
     } else {
-      showStageList(setKey);
+      showHome(setKey);
     }
   } else {
     showHome();

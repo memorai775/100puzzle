@@ -21,30 +21,27 @@
         <p class="subtitle">数字と ＋−×÷ で答えを作ろう</p>
       </header>
 
-      <!-- 毎日更新の100パズル -->
-      <a class="menu-card menu-daily" href="#/daily">
-        <span class="menu-badge">毎日更新</span>
-        <span class="menu-title">今日の100パズル</span>
-        <span class="menu-desc" id="daily-desc">6つの数字で100を作る</span>
-      </a>
+      <!-- タブ（テンパズル・100パズル・1000パズル。script.js で作ります） -->
+      <nav class="tabs" id="tabs" aria-label="パズルの種類"></nav>
 
-      <p class="streak" id="streak"></p>
+      <!-- 選んでいるタブの中身 -->
+      <div class="tab-panel" id="tab-panel">
 
-      <!-- いつでも遊べるステージ（テンパズル・100パズル・1000パズル。script.js で作ります） -->
-      <h2 class="section-title">ステージ（いつでも遊べる）</h2>
-      <div class="set-menu" id="set-menu"></div>
-    </section>
+        <!-- 毎日更新の100パズル（100パズルのタブだけに出す） -->
+        <div class="daily-area" id="daily-area">
+          <h2 class="section-title">毎日更新</h2>
+          <a class="menu-card menu-daily" href="#/daily">
+            <span class="menu-title">今日の100パズル</span>
+            <span class="menu-desc" id="daily-desc">6つの数字で100を作る</span>
+          </a>
+          <p class="streak" id="streak"></p>
+        </div>
 
-    <!-- =====================================================
-         ステージ選択画面（3種類共通）
-         ===================================================== -->
-    <section class="screen" id="screen-stages" hidden>
-      <header class="screen-header">
-        <a class="back-btn" href="#/">← もどる</a>
-        <h2 class="screen-title" id="stages-title"></h2>
-      </header>
-      <p class="stage-progress" id="stage-progress"></p>
-      <div class="stage-grid" id="stage-grid"></div>
+        <!-- いつでも遊べるステージ -->
+        <h2 class="section-title" id="stages-heading"></h2>
+        <p class="stage-progress" id="stage-progress"></p>
+        <div class="stage-grid" id="stage-grid"></div>
+      </div>
     </section>
 
     <!-- =====================================================
