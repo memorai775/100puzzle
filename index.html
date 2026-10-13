@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <!-- スマホで等倍表示にするための設定 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>テンパズル｜1日1問</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- defer：HTMLを読み終わってからスクリプトを実行する -->
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <main class="app">
+
+    <!-- ===== ヘッダー ===== -->
+    <header class="header">
+      <h1 class="title">テンパズル</h1>
+      <p class="puzzle-info" id="puzzle-info">読み込み中…</p>
+    </header>
+
+    <p class="lead">4つの数字を全部使って <strong>10</strong> を作ろう</p>
+
+    <!-- ===== 今日の4つの数字（ボタンは script.js で作ります） ===== -->
+    <section class="numbers" id="numbers" aria-label="今日の数字"></section>
+
+    <!-- ===== 組み立て中の式 ===== -->
+    <section class="expression-box" id="expression-box">
+      <div class="expression" id="expression"></div>
+    </section>
+
+    <!-- ===== 演算子・カッコ・編集ボタン ===== -->
+    <section class="keypad">
+      <button class="key key-op" data-op="+" aria-label="たす">＋</button>
+      <button class="key key-op" data-op="-" aria-label="ひく">−</button>
+      <button class="key key-op" data-op="*" aria-label="かける">×</button>
+      <button class="key key-op" data-op="/" aria-label="わる">÷</button>
+      <button class="key key-paren" data-paren="(" aria-label="カッコ開き">(</button>
+      <button class="key key-paren" data-paren=")" aria-label="カッコ閉じ">)</button>
+      <button class="key key-sub" id="undo-btn">1つ戻す</button>
+      <button class="key key-sub" id="clear-btn">全部消す</button>
+    </section>
+
+    <!-- ===== 答え合わせ ===== -->
+    <button class="check-btn" id="check-btn">答え合わせ</button>
+
+    <!-- 結果メッセージ（aria-live：読み上げソフトにも変化を伝える） -->
+    <p class="message" id="message" aria-live="polite"></p>
+    <p class="attempts" id="attempts"></p>
+
+  </main>
+
+  <!-- 正解したときの紙吹雪を入れる場所 -->
+  <div class="confetti" id="confetti" aria-hidden="true"></div>
+</body>
+</html>

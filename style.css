@@ -1,0 +1,293 @@
+/* =========================================================
+   テンパズル style.css
+   スマホ縦画面を前提にしたデザイン
+   ========================================================= */
+
+/* ----- 色やサイズをまとめて定義（ここを変えると全体の色が変わる） ----- */
+:root {
+  --bg: #f6f4ef;          /* 背景 */
+  --surface: #ffffff;     /* カードの背景 */
+  --text: #2b2b2b;        /* 文字 */
+  --muted: #8a8577;       /* 薄い文字 */
+  --primary: #ff7a3d;     /* メインの色（オレンジ） */
+  --primary-dark: #e2601f;
+  --num: #3d6bff;         /* 数字カードの色 */
+  --op: #44403a;          /* 演算子ボタンの色 */
+  --ok: #2fb36b;          /* 正解の色 */
+  --ng: #e5484d;          /* 不正解の色 */
+  --radius: 14px;
+  --shadow: 0 3px 0 rgba(0, 0, 0, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP",
+    "Yu Gothic UI", Meiryo, sans-serif;
+  /* タップしたときの青いハイライトを消す */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 画面全体：スマホ幅に合わせ、PCでは中央に寄せる */
+.app {
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 16px 16px calc(24px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ----- ヘッダー ----- */
+.header {
+  text-align: center;
+}
+
+.title {
+  margin: 4px 0 0;
+  font-size: 28px;
+  letter-spacing: 0.08em;
+}
+
+.puzzle-info {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.lead {
+  margin: 0;
+  text-align: center;
+  font-size: 15px;
+}
+
+.lead strong {
+  color: var(--primary);
+  font-size: 20px;
+}
+
+/* ----- ボタン共通 ----- */
+button {
+  font: inherit;
+  border: none;
+  cursor: pointer;
+  /* ダブルタップでズームしないようにする */
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+button:disabled {
+  cursor: default;
+}
+
+/* 押したときに少し沈む */
+button:not(:disabled):active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+
+/* ----- 数字カード ----- */
+.numbers {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.num-card {
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius);
+  background: var(--num);
+  color: #fff;
+  font-size: 40px;
+  font-weight: 700;
+  box-shadow: var(--shadow);
+  transition: opacity 0.15s, background 0.15s;
+}
+
+/* 使用済みの数字：薄く表示 */
+.num-card.is-used {
+  background: #c9c6be;
+  box-shadow: none;
+}
+
+/* 未使用だけど今は置けない数字（例：数字の直後） */
+.num-card:disabled:not(.is-used) {
+  opacity: 0.55;
+}
+
+/* ----- 式の表示欄 ----- */
+.expression-box {
+  min-height: 84px;
+  padding: 12px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 2px solid #e6e2d8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.expression {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-align: center;
+  word-break: break-all;
+}
+
+/* 何も入力していないときの案内文 */
+.expression.is-empty {
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+/* 正解・不正解で枠の色を変える */
+.expression-box.is-correct {
+  border-color: var(--ok);
+  background: #eafaf1;
+  animation: pop 0.4s ease;
+}
+
+.expression-box.is-wrong {
+  border-color: var(--ng);
+  animation: shake 0.4s ease;
+}
+
+/* ----- キーパッド（演算子など） ----- */
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.key {
+  height: 60px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.key-op,
+.key-paren {
+  background: var(--op);
+  color: #fff;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.key-sub {
+  grid-column: span 2; /* 横に2マス分使う */
+  background: var(--surface);
+  color: var(--text);
+  font-size: 16px;
+  border: 2px solid #e6e2d8;
+}
+
+.key:disabled {
+  opacity: 0.35;
+  box-shadow: none;
+}
+
+/* ----- 答え合わせボタン ----- */
+.check-btn {
+  height: 64px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  box-shadow: 0 4px 0 var(--primary-dark);
+}
+
+.check-btn:disabled {
+  background: #d8d4ca;
+  box-shadow: none;
+}
+
+/* ----- メッセージ ----- */
+.message {
+  min-height: 1.6em;
+  margin: 0;
+  text-align: center;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.message.is-correct {
+  color: var(--ok);
+  font-size: 24px;
+}
+
+.message.is-wrong {
+  color: var(--ng);
+}
+
+.message.is-hint {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.attempts {
+  margin: 0;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* ----- 紙吹雪 ----- */
+.confetti {
+  position: fixed;
+  inset: 0;
+  pointer-events: none; /* 下のボタンを押せるようにする */
+  overflow: hidden;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -20px;
+  width: 10px;
+  height: 14px;
+  border-radius: 2px;
+  animation: fall 1.8s ease-in forwards;
+}
+
+/* ----- アニメーション ----- */
+@keyframes pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(110vh) rotate(720deg);
+    opacity: 0.8;
+  }
+}
+
+/* 「動きを減らす」設定の人にはアニメーションを控える */
+@media (prefers-reduced-motion: reduce) {
+  .expression-box.is-correct,
+  .expression-box.is-wrong {
+    animation: none;
+  }
+  .confetti {
+    display: none;
+  }
+}
