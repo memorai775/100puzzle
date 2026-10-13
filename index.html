@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <!-- スマホで等倍表示にするための設定 -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>テンパズル｜1日1問</title>
+  <title>数字パズル｜100パズル・テンパズル</title>
   <link rel="stylesheet" href="style.css">
   <!-- defer：HTMLを読み終わってからスクリプトを実行する -->
   <script src="script.js" defer></script>
@@ -12,40 +12,84 @@
 <body>
   <main class="app">
 
-    <!-- ===== ヘッダー ===== -->
-    <header class="header">
-      <h1 class="title">テンパズル</h1>
-      <p class="puzzle-info" id="puzzle-info">読み込み中…</p>
-    </header>
+    <!-- =====================================================
+         トップ画面
+         ===================================================== -->
+    <section class="screen" id="screen-home">
+      <header class="header">
+        <h1 class="title">数字パズル</h1>
+        <p class="subtitle">数字と ＋−×÷ で答えを作ろう</p>
+      </header>
 
-    <p class="lead">4つの数字を全部使って <strong>10</strong> を作ろう</p>
+      <!-- 毎日更新の100パズル -->
+      <a class="menu-card menu-daily" href="#/daily">
+        <span class="menu-badge">毎日更新</span>
+        <span class="menu-title">今日の100パズル</span>
+        <span class="menu-desc" id="daily-desc">6つの数字で100を作る</span>
+      </a>
 
-    <!-- ===== 今日の4つの数字（ボタンは script.js で作ります） ===== -->
-    <section class="numbers" id="numbers" aria-label="今日の数字"></section>
+      <!-- いつでも遊べるテンパズル -->
+      <a class="menu-card menu-stages" href="#/stages">
+        <span class="menu-badge">いつでも</span>
+        <span class="menu-title">テンパズル</span>
+        <span class="menu-desc" id="stages-desc">4つの数字で10を作る・全30ステージ</span>
+      </a>
 
-    <!-- ===== 組み立て中の式 ===== -->
-    <section class="expression-box" id="expression-box">
-      <div class="expression" id="expression"></div>
+      <p class="streak" id="streak"></p>
     </section>
 
-    <!-- ===== 演算子・カッコ・編集ボタン ===== -->
-    <section class="keypad">
-      <button class="key key-op" data-op="+" aria-label="たす">＋</button>
-      <button class="key key-op" data-op="-" aria-label="ひく">−</button>
-      <button class="key key-op" data-op="*" aria-label="かける">×</button>
-      <button class="key key-op" data-op="/" aria-label="わる">÷</button>
-      <button class="key key-paren" data-paren="(" aria-label="カッコ開き">(</button>
-      <button class="key key-paren" data-paren=")" aria-label="カッコ閉じ">)</button>
-      <button class="key key-sub" id="undo-btn">1つ戻す</button>
-      <button class="key key-sub" id="clear-btn">全部消す</button>
+    <!-- =====================================================
+         テンパズル：ステージ選択画面
+         ===================================================== -->
+    <section class="screen" id="screen-stages" hidden>
+      <header class="screen-header">
+        <a class="back-btn" href="#/">← もどる</a>
+        <h2 class="screen-title">テンパズル</h2>
+      </header>
+      <p class="stage-progress" id="stage-progress"></p>
+      <div class="stage-grid" id="stage-grid"></div>
     </section>
 
-    <!-- ===== 答え合わせ ===== -->
-    <button class="check-btn" id="check-btn">答え合わせ</button>
+    <!-- =====================================================
+         ゲーム画面（100パズル・テンパズル共通）
+         ===================================================== -->
+    <section class="screen" id="screen-game" hidden>
+      <header class="screen-header">
+        <a class="back-btn" id="game-back" href="#/">← もどる</a>
+        <h2 class="screen-title" id="game-title"></h2>
+      </header>
+      <p class="puzzle-info" id="puzzle-info"></p>
+      <p class="lead" id="game-lead"></p>
 
-    <!-- 結果メッセージ（aria-live：読み上げソフトにも変化を伝える） -->
-    <p class="message" id="message" aria-live="polite"></p>
-    <p class="attempts" id="attempts"></p>
+      <!-- 数字カード（script.js で作ります） -->
+      <div class="numbers" id="numbers" aria-label="使う数字"></div>
+
+      <!-- 組み立て中の式 -->
+      <div class="expression-box" id="expression-box">
+        <div class="expression" id="expression"></div>
+      </div>
+
+      <!-- 演算子・カッコ・編集ボタン -->
+      <div class="keypad">
+        <button class="key key-op" data-op="+" aria-label="たす">＋</button>
+        <button class="key key-op" data-op="-" aria-label="ひく">−</button>
+        <button class="key key-op" data-op="*" aria-label="かける">×</button>
+        <button class="key key-op" data-op="/" aria-label="わる">÷</button>
+        <button class="key key-paren" data-paren="(" aria-label="カッコ開き">(</button>
+        <button class="key key-paren" data-paren=")" aria-label="カッコ閉じ">)</button>
+        <button class="key key-sub" id="undo-btn">1つ戻す</button>
+        <button class="key key-sub" id="clear-btn">全部消す</button>
+      </div>
+
+      <button class="check-btn" id="check-btn">答え合わせ</button>
+
+      <!-- 結果メッセージ（aria-live：読み上げソフトにも変化を伝える） -->
+      <p class="message" id="message" aria-live="polite"></p>
+      <p class="attempts" id="attempts"></p>
+
+      <!-- クリア後に出すボタン（中身は script.js で作ります） -->
+      <div class="after-clear" id="after-clear" hidden></div>
+    </section>
 
   </main>
 
